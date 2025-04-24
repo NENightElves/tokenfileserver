@@ -5,6 +5,7 @@ import secrets
 import time
 import argparse
 from werkzeug.utils import secure_filename
+from flasgger import Swagger
 
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument("--help", action="help", help="Show Help Message")
@@ -36,6 +37,11 @@ if args.init or os.path.exists(dbname) is False:
 folder = args.folder
 allowed_ext = args.ext.strip().lower().split(',')
 app = Flask(__name__)
+app.config['SWAGGER'] = {
+    'title': 'Token File Server',
+    'version': '1.0.0'
+}
+swagger = Swagger(app)
 
 
 def get_admin_token():
@@ -92,11 +98,39 @@ def is_file_allowed(filename):
 
 @app.route('/')
 def index():
+    """
+    Welcome Page
+    ---
+    operationId: welcome
+    description: Welcome Page
+    """
     return 'Token File Server\n'
 
 
 @app.route('/renew')
 def renew():
+    """
+    Renew token
+    ---
+    description: Renew token
+    parameters:
+      - name: Authorization
+        in: header
+        type: string
+        required: true
+        description: token
+    responses:
+      200:
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              description: ok if success
+            token:
+              type: string
+              description: new token
+    """
     t = request.headers.get('Authorization')
     a = get_auth(t)
     if a != 0:
@@ -110,6 +144,38 @@ def renew():
 
 @app.route('/create')
 def create():
+    """
+    Create new token
+    ---
+    description: Create new token
+    parameters:
+      - name: Authorization
+        in: header
+        type: string
+        required: true
+        description: token
+      - name: expire
+        in: query
+        type: integer
+        required: true
+        description: expire time in seconds
+      - name: auth
+        in: query
+        type: integer
+        required: false
+        description: 1 for subadmin, 2 for user, default is 2
+    responses:
+      200:
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              description: ok if success
+            token:
+              type: string
+              description: new token
+    """
     t = request.headers.get('Authorization')
     a = get_auth(t)
     if a != 0 and a != 1:
@@ -133,6 +199,25 @@ def create():
 
 @app.route('/invalidate')
 def invalidate():
+    """
+    Invalidate a token
+    ---
+    description: Invalidate a token
+    parameters:
+      - name: Authorization
+        in: header
+        type: string
+        required: true
+        description: token and this token will be invalidated
+    responses:
+      200:
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              description: ok if success
+    """
     t = request.headers.get('Authorization')
     a = get_auth(t)
     if a == 0 or a == -1:
@@ -146,6 +231,33 @@ def invalidate():
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    """
+    Upload a file
+    ---
+    description: Upload a file
+    parameters:
+      - name: Authorization
+        in: header
+        type: string
+        required: true
+        description: token
+      - name: file
+        in: formData
+        type: file
+        required: true
+        description: file to upload
+    responses:
+      200:
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              description: ok if success
+            filename:
+              type: string
+              description: filename for download, this will be used in "/download" api
+    """
     t = request.headers.get('Authorization')
     a = get_auth(t)
     if a == -1:
@@ -170,17 +282,56 @@ def upload():
 
 @app.route('/download/<filename>')
 def download(filename):
+    """
+    Download a file
+    ---
+    description: Download a file
+    produces:
+      - application/octet-stream
+      - application/json
+    parameters:
+      - name: Authorization
+        in: header
+        type: string
+        required: true
+        description: token
+      - name: filename
+        in: path
+        type: string
+        required: true
+        description: filename for download, this is returned by "/upload" api
+    responses:
+      200:
+        schema:
+          type: string
+          format: binary
+          description: file content
+      404:
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              description: file not found
+      401:
+        schema:
+          type: object
+          properties:
+            msg:
+              type: string
+              description: invalid operation
+    """
     t = request.headers.get('Authorization')
     a = get_auth(t)
     if a == -1:
-        return {'msg': 'invalid operation'}
+        return {'msg': 'invalid operation'}, 401
     with sqlite3.connect(dbname) as conn:
         row = conn.execute('''SELECT * FROM files WHERE realfilename = ? and token = ?''', (filename, t)).fetchone()
     if row is None:
-        return {'msg': 'file not found'}
+        return {'msg': 'file not found'}, 404
     filepath = os.path.join(folder, t, row[2])
     if os.path.exists(filepath) is False:
-        return {'msg': 'file not found'}
+        return {'msg': 'file not found'}, 404
     return send_file(filepath, download_name=row[1], as_attachment=True)
 
 
