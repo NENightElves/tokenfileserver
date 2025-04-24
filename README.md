@@ -19,10 +19,11 @@ python3 main.py --help
 ```
 The typical usage of the script is as follows:
 ```
-python3 main.py -f files -p 5000 --init
+python3 main.py -f files -p 5000 --init --swagger
 ```
 - `-f` will specify the directory where the files will be stored.
 - `-p` will specify the port the server will listen on.
 - `--init` will force to initialize the database.
+- `--swagger` will enable the swagger API documentation.
 
 Then you can visit `http://localhost:5000/apidocs` to get the API documentation.

@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument("--help", action="help", help="Show Help Message")
 parser.add_argument("--init", action="store_true", help="if init the database")
 parser.add_argument("--threaded", action="store_true", help="if use threaded mode")
+parser.add_argument("--swagger", action="store_true", help="if enable swagger")
 parser.add_argument("--debug", action="store_true", help="if debug mode")
 parser.add_argument("--db", "-d", default="tokenfileserver.db", help="database file name")
 parser.add_argument("--folder", "-f", default="files", help="folder to store files")
@@ -37,11 +38,12 @@ if args.init or os.path.exists(dbname) is False:
 folder = args.folder
 allowed_ext = args.ext.strip().lower().split(',')
 app = Flask(__name__)
-app.config['SWAGGER'] = {
-    'title': 'Token File Server',
-    'version': '1.0.0'
-}
-swagger = Swagger(app)
+if args.swagger:
+    app.config['SWAGGER'] = {
+        'title': 'Token File Server',
+        'version': '1.0.0'
+    }
+    swagger = Swagger(app)
 
 
 def get_admin_token():
