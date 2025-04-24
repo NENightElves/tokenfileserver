@@ -116,22 +116,22 @@ def renew():
     ---
     description: Renew token
     parameters:
-      - name: Authorization
-        in: header
-        type: string
-        required: true
-        description: token
+        - name: Authorization
+          in: header
+          type: string
+          required: true
+          description: token
     responses:
-      200:
-        schema:
-          type: object
-          properties:
-            msg:
-              type: string
-              description: ok if success
-            token:
-              type: string
-              description: new token
+        200:
+            schema:
+            type: object
+            properties:
+                msg:
+                type: string
+                description: ok if success
+                token:
+                type: string
+                description: new token
     """
     t = request.headers.get('Authorization')
     a = get_auth(t)
@@ -151,32 +151,32 @@ def create():
     ---
     description: Create new token
     parameters:
-      - name: Authorization
-        in: header
-        type: string
-        required: true
-        description: token
-      - name: expire
-        in: query
-        type: integer
-        required: true
-        description: expire time in seconds
-      - name: auth
-        in: query
-        type: integer
-        required: false
-        description: 1 for subadmin, 2 for user, default is 2
+        - name: Authorization
+          in: header
+          type: string
+          required: true
+          description: token
+        - name: expire
+          in: query
+          type: integer
+          required: true
+          description: expire time in seconds
+        - name: auth
+          in: query
+          type: integer
+          required: false
+          description: 1 for subadmin, 2 for user, default is 2
     responses:
-      200:
-        schema:
-          type: object
-          properties:
-            msg:
-              type: string
-              description: ok if success
-            token:
-              type: string
-              description: new token
+        200:
+            schema:
+                type: object
+                properties:
+                    msg:
+                        type: string
+                        description: ok if success
+                    token:
+                        type: string
+                        description: new token
     """
     t = request.headers.get('Authorization')
     a = get_auth(t)
@@ -206,19 +206,19 @@ def invalidate():
     ---
     description: Invalidate a token
     parameters:
-      - name: Authorization
-        in: header
-        type: string
-        required: true
-        description: token and this token will be invalidated
+        - name: Authorization
+          in: header
+          type: string
+          required: true
+          description: token and this token will be invalidated
     responses:
-      200:
-        schema:
-          type: object
-          properties:
-            msg:
-              type: string
-              description: ok if success
+        200:
+            schema:
+                type: object
+                properties:
+                    msg:
+                        type: string
+                        description: ok if success
     """
     t = request.headers.get('Authorization')
     a = get_auth(t)
@@ -238,27 +238,27 @@ def upload():
     ---
     description: Upload a file
     parameters:
-      - name: Authorization
-        in: header
-        type: string
-        required: true
-        description: token
-      - name: file
-        in: formData
-        type: file
-        required: true
-        description: file to upload
+        - name: Authorization
+          in: header
+          type: string
+          required: true
+          description: token
+        - name: file
+          in: formData
+          type: file
+          required: true
+          description: file to upload
     responses:
-      200:
-        schema:
-          type: object
-          properties:
-            msg:
-              type: string
-              description: ok if success
-            filename:
-              type: string
-              description: filename for download, this will be used in "/download" api
+        200:
+            schema:
+                type: object
+                properties:
+                    msg:
+                        type: string
+                        description: ok if success
+                    filename:
+                        type: string
+                        description: filename for download, this will be used in "/download" api
     """
     t = request.headers.get('Authorization')
     a = get_auth(t)
@@ -289,39 +289,39 @@ def download(filename):
     ---
     description: Download a file
     produces:
-      - application/octet-stream
-      - application/json
+        - application/octet-stream
+        - application/json
     parameters:
-      - name: Authorization
-        in: header
-        type: string
-        required: true
-        description: token
-      - name: filename
-        in: path
-        type: string
-        required: true
-        description: filename for download, this is returned by "/upload" api
-    responses:
-      200:
-        schema:
+        - name: Authorization
+          in: header
           type: string
-          format: binary
-          description: file content
-      404:
-        schema:
-          type: object
-          properties:
-            msg:
-              type: string
-              description: file not found
-      401:
-        schema:
-          type: object
-          properties:
-            msg:
-              type: string
-              description: invalid operation
+          required: true
+          description: token
+        - name: filename
+          in: path
+          type: string
+          required: true
+          description: filename for download, this is returned by "/upload" api
+    responses:
+        200:
+            schema:
+                type: string
+                format: binary
+                description: file content
+        404:
+            schema:
+                type: object
+                properties:
+                    msg:
+                        type: string
+                        description: file not found
+        401:
+            schema:
+                type: object
+                properties:
+                    msg:
+                        type: string
+                        description: invalid operation
     """
     t = request.headers.get('Authorization')
     a = get_auth(t)
