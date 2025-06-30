@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+  <UApp :toaster="{ position: 'top-center' }">
+    <NuxtPage />
+  </UApp>
 </template>
