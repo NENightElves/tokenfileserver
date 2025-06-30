@@ -37,7 +37,10 @@ if args.init or os.path.exists(dbname) is False:
     init(dbname)
 folder = args.folder
 allowed_ext = args.ext.strip().lower().split(',')
-app = Flask(__name__)
+if os.path.exists('static'):
+    app = Flask(__name__, static_folder='static', static_url_path='')
+else:
+    app = Flask(__name__)
 if args.swagger:
     app.config['SWAGGER'] = {
         'title': 'Token File Server',
@@ -106,6 +109,8 @@ def index():
     operationId: welcome
     description: Welcome Page
     """
+    if os.path.exists('./static/index.html'):
+        return send_file('./static/index.html')
     return 'Token File Server\n'
 
 
@@ -189,7 +194,7 @@ def create():
     if auth is None:
         auth = 2
     auth = int(auth)
-    if auth != 1 or auth != 2:
+    if auth != 1 and auth != 2:
         auth = 2
     token = get_new_token()
     expire = int(time.time()) + int(expire)
@@ -334,7 +339,7 @@ def download(filename):
     filepath = os.path.join(folder, t, row[2])
     if os.path.exists(filepath) is False:
         return {'msg': 'file not found'}, 404
-    return send_file(filepath, download_name=row[1], as_attachment=True)
+    return send_file(filepath, download_name=row[1], as_attachment=True, mimetype='application/octet-stream')
 
 
 if __name__ == '__main__':
